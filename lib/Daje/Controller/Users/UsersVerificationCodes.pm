@@ -1,23 +1,23 @@
-package Daje::Controller::Users::UsersUsers;
-use Mojo::Base 'Daje::Controller::Users::Super::UsersUsers', -base, -signatures;
+package Daje::Controller::Users::UsersVerificationCodes;
+use Mojo::Base 'Daje::Controller::Users::Super::UsersVerificationCodes', -base, -signatures;
 use v5.42;
 
 # NAME
 # ====
 #
-# Daje::Controller::Users::UsersUsers - Controller class
+# Daje::Controller::Users::UsersVerificationCodes - Controller class
 #
 # SYNOPSIS
 # ========
 #
-#       use Daje::Controller::Users::UsersUsers
+#       use Daje::Controller::Users::UsersVerificationCodes
 #
 #
 #
 # DESCRIPTION
 # ===========
 #
-# Daje::Controller::Users::UsersUsers is a standard controller
+# Daje::Controller::Users::UsersVerificationCodes is a standard controller
 #
 # METHODS
 # =======

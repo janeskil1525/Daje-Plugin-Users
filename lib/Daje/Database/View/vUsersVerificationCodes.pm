@@ -1,27 +1,27 @@
-package Daje::Database::View::vUsersUsers;
-use Mojo::Base 'Daje::Database::View::Super::vUsersUsers', -base, -async_await, -signatures;
+package Daje::Database::View::vUsersVerificationCodes;
+use Mojo::Base 'Daje::Database::View::Super::vUsersVerificationCodes', -base, -async_await, -signatures;
 use v5.42;
 
 # NAME
 # ====
 #
-# Daje::Database::View::vUsersUsers - View class
+# Daje::Database::View::vUsersVerificationCodes - View class
 #
 # SYNOPSIS
 # ========
 #
-#       use Daje::Database::View::vUsersUsers;
+#       use Daje::Database::View::vUsersVerificationCodes;
 #
-#       my $class = Daje::Database::View::vUsersUsers->new(db => $db);
+#       my $class = Daje::Database::View::vUsersVerificationCodes->new(db => $db);
 #
 # DESCRIPTION
 # ===========
 #
-# Daje::Database::View::vUsersUsers is the View
+# Daje::Database::View::vUsersVerificationCodes is the View
 #
 # class that's only generated once. It inherits all
 #
-# methods from Daje::Database::View::Super::vUsersUsers#
+# methods from Daje::Database::View::Super::vUsersVerificationCodes#
 # This class is meant for non standard methods.
 #
 # METHODS

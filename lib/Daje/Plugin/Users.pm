@@ -63,7 +63,8 @@ use v5.42;
 
 use Daje::Plugin::Users::Routes;
 use Daje::Plugin::Users::Helpers;
-use  Daje::Database::Migrator;
+use Daje::Database::Migrator;
+use Daje::Helper::Users::Login;
 
 our $VERSION = '0.01';
 
@@ -83,6 +84,22 @@ sub register ($self, $app, $config) {
     } catch ($e) {
         $app->log->error($e);
     };
+
+    my $r = $app->routes();
+
+    $r->put($app->config->{project} . '/api/login/')->to('Login#login_user');
+    $r->put($app->config->{project} . '/api/verify/')->to('Login#check_verify');
+    $r->put($app->config->{project} . '/api/new/client/signup')->to('Signup#signup');
+
+
+    $app->helper(
+        login => sub {
+            state $login = Daje::Helper::Users::Login->new(
+                pg     => $app->pg,
+                config => $app->config
+            )
+        }
+    );
 
     Daje::Plugin::Users::Routes->new()->routes($app, $config);
     Daje::Plugin::Users::Helpers->new()->helpers($app, $config);
