@@ -48,6 +48,7 @@ use v5.42;
 
 
 our $VERSION = '0.01';
+use Data::Dumper;
 
 sub save_verification_code($self, $users_users_pkey, $verification_code) {
 
@@ -56,7 +57,7 @@ sub save_verification_code($self, $users_users_pkey, $verification_code) {
         INSERT INTO users_verification_codes (users_users_fkey, verification_code) VALUES(?, ?)
             ON CONFLICT(users_users_fkey)
         DO UPDATE SET verification_code = ?
-            RETURNING login_verification_codes_pkey;
+            RETURNING users_verification_codes_pkey;
     };
 
     my $login_verification_codes_pkey = $self->db->query(
@@ -74,7 +75,7 @@ sub save_verification_code_new_user($self, $mail, $verification_code) {
             VALUES((SELECT users_users_pkey FROM users_users WHERE mail = ?), ?)
                 ON CONFLICT(users_users_fkey)
         DO UPDATE SET verification_code = ?
-            RETURNING login_verification_codes_pkey;
+            RETURNING users_verification_codes_pkey;
     };
 
     my $login_verification_codes_pkey = $self->db->query(
@@ -86,14 +87,15 @@ sub save_verification_code_new_user($self, $mail, $verification_code) {
 
 sub check_verify($self, $mail, $verification_code) {
     my $verification_stmt = qq{
-        SELECT login_verification_codes_pkey FROM users_verification_codes
+        SELECT users_verification_codes_pkey FROM users_verification_codes
             WHERE users_users_fkey = (SELECT users_users_pkey FROM users_users WHERE mail = ?) and verification_code = ?;
     };
 
     my $hash = $self->db->query(
         $verification_stmt,($mail, $verification_code)
-    )->{login_verification_codes_pkey};
-    return 1 if $hash && $hash->rows > 0;
+    );
+
+    return 1 if $hash && $hash->hash->{users_verification_codes_pkey} > 0;
     return 0;
 }
 

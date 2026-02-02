@@ -54,7 +54,7 @@ use Digest::SHA qw{sha512_base64};
 
 our $VERSION = "0.01";
 
-has 'pg';
+has 'db';
 has 'config';
 
 async sub login_user ($self, $mail, $password) {
@@ -63,7 +63,7 @@ async sub login_user ($self, $mail, $password) {
 
     say "Password: " . Dumper($password);
     my $login = Daje::Database::Model::Login->new(
-        pg => $self->pg
+        db => $self->db
     )->login(
         $mail, $password
     );
@@ -95,6 +95,7 @@ async sub login_user ($self, $mail, $password) {
 }
 
 async sub check_verify($self, $mail, $verification_code) {
+    say " Daje::Helper::Users::Login->check_verify mail = $mail code = $verification_code";
     return 1
         if Daje::Database::Model::UsersVerificationCodes->new(db => $self->db)->check_verify($mail, $verification_code);
     return 0;
@@ -110,7 +111,7 @@ sub verification($self, $users_users_pkey) {
     my $verification_code = join '' => map $set[rand @set], 1 .. 4;
 
     my $login_verification_codes_pkey = Daje::Database::Model::UsersVerificationCodes->new(
-        db => $self->pg->db
+        db => $self->db
     )->save_verification_code(
         $users_users_pkey, $verification_code
     );

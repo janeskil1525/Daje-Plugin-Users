@@ -1,4 +1,4 @@
-package Daje::Controller::Users::Login::Login;
+package Daje::Controller::Users::Login;
 use Mojo::Base 'Mojolicious::Controller', -signatures;
 use v5.42;
 
@@ -62,7 +62,7 @@ sub check_verify($self) {
 
     my $data = from_json($self->req->body);
     say "Place 0 " . Dumper($data);
-    $self->login->check_verify($data->{mail}, $data->{code})->then(sub ($result) {
+    $self->login->check_verify($data->{body}->{mail}, $data->{body}->{code})->then(sub ($result) {
         if(defined $result) {
             $self->render(json => {'result' => $result});
         } else {

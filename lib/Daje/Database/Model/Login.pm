@@ -40,17 +40,17 @@ use v5.42;
 use Data::Dumper;
 our $VERSION = "0.01";
 
-has 'pg';
+has 'db';
 
 sub login ($self, $mail, $password) {
 
     my $login_stmt = qq{
-        SELECT users_users_pkey, mail, name, support, password
+        SELECT users_users_pkey, mail, name, password
             FROM users_users
            WHERE mail = ? AND password = ? AND active = true
     };
 
-    my $result = $self->pg->db->query($login_stmt,($mail, $password));
+    my $result = $self->db->query($login_stmt,($mail, $password));
 
     my $hash;
     $hash = $result->hash if $result->rows;
@@ -61,7 +61,7 @@ sub login ($self, $mail, $password) {
            WHERE mail = ? AND active = false
         };
 
-        $result = $self->pg->db->query($login_stmt,($mail));
+        $result = $self->db->query($login_stmt,($mail));
         $hash = $result->hash if $result->rows;
         if($hash->{inactive} == 1) {
             $hash = {};
@@ -72,7 +72,7 @@ sub login ($self, $mail, $password) {
                 FROM users_users
                WHERE mail = ?
             };
-            $result = $self->pg->db->query($login_stmt,($mail));
+            $result = $self->db->query($login_stmt,($mail));
             $hash = $result->hash if $result->rows;
             if($hash->{exists} == 0) {
                 $hash = {};
@@ -98,7 +98,7 @@ sub check_creds ($self, $userid, $password) {
            WHERE userid = ? AND passwd = ? AND active = true
     };
 
-    my $result = $self->pg->db->query(
+    my $result = $self->db->query(
         $check_stmt,($userid, $password)
     )->hash->{exists};
 

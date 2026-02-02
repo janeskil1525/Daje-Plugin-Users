@@ -95,7 +95,7 @@ sub register ($self, $app, $config) {
     $app->helper(
         login => sub {
             state $login = Daje::Helper::Users::Login->new(
-                pg     => $app->pg,
+                db     => $app->pg->db,
                 config => $app->config
             )
         }
