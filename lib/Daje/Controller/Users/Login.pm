@@ -32,17 +32,16 @@ use v5.42;
 # janeskil1525 E<lt>janeskil1525@gmail.comE<gt>
 #
 use Data::Dumper;
-use Mojo::JSON qw{from_json};
+use Mojo::JSON qw{from_json decode_json};
 
 our $VERSION = "0.01";
 
 sub login_user($self) {
 
-    say "Login user";
+
     $self->render_later;
 
     my $data = from_json($self->req->body);
-
     $self->login->login_user($data->{mail}, $data->{password})->then(sub ($result) {
         if(defined $result) {
             $self->render(json => {'result' => "success", data => $result});
@@ -57,16 +56,15 @@ sub login_user($self) {
 
 sub check_verify($self) {
 
-    say "Login user";
     $self->render_later;
 
     my $data = from_json($self->req->body);
-    say "Place 0 " . Dumper($data);
-    $self->login->check_verify($data->{body}->{mail}, $data->{body}->{code})->then(sub ($result) {
-        if(defined $result) {
-            $self->render(json => {'result' => $result});
+    say "check_verify " . Dumper($data);
+    $self->login->check_verify($data->{mail}, $data->{code})->then(sub ($result) {
+        if(defined $result and $result == 1) {
+            $self->render(json => {'result' => 'success', verified => 'true'});
         } else {
-            $self->render(json => {'result' => "0"});
+            $self->render(json => {'result' => 'success', , verified => 'false'});
         }
     })->catch(sub ($err) {
         say "Error " . $err;
@@ -74,25 +72,59 @@ sub check_verify($self) {
     })->wait;
 }
 
-sub load_company($self) {
+sub signup($self) {
 
-    say "Load company";
-    $self->render_later;
-
-    my $data = from_json($self->req->body);
-    say "Place 0 " . Dumper($data);
-    $self->login->load_company($data->{mail})->then(sub ($result) {
-        say "Place 1 " . Dumper($result);
-        if(defined $result) {
-            $self->render(json => {'result' => $result});
+    $self->app->log->debug('Daje::Controller::Users::Login::signup '  . Dumper($self->req->body));
+    my $data->{context} = decode_json( $self->req->body );
+    try {
+        $self->workflow_engine->workflow_pkey(0);
+        $self->workflow_engine->workflow_name('users_users');
+        $self->workflow_engine->context($data);
+        $self->workflow_engine->process('register_new_users_user');
+        if($self->workflow_engine->error->has_error() == 0) {
+            $self->render(json => {result => 1, data => 'OK'});
         } else {
-            $self->render(json => {'result' => "0"});
+            $self->app->log->error('Daje::Controller::Users::Login::signup ' . $self->workflow_engine->error->error());
+            $self->render(json =>
+                {result => 0, data => $self->workflow_engine->error->error()}
+            );
         }
-    })->catch(sub ($err) {
-        say "Error " . $err;
-        $self->render(json => {'result' => $err});
-    })->wait;
+    } catch ($e) {
+        $self->app->log->error('Daje::Controller::Users::Login::signup ' . $e);
+        $self->render(json => {result => 0, data => $e});
+    };
+    $self->app->log->debug('Daje::Controller::Users::Login::signup ends');
 }
+
+sub verify($self) {
+
+    $self->app->log->debug('Daje::Controller::Users::Login::verify '  . Dumper($self->req->body));
+    my $data->{context} = decode_json $self->req->body;
+    try {
+say Dumper($data);
+        $self->workflow_engine->workflow_pkey($data->{context}->{payload}->{users_workflow_fkey});
+        $self->workflow_engine->workflow_name('users_users');
+        $self->workflow_engine->context($data);
+        say "1";
+        $self->workflow_engine->process('verify_users_user');
+        say "2";
+        if($self->workflow_engine->error->has_error() == 0) {
+            say "3";
+            $self->render(json => {result => 1, data => 'OK'});
+        } else {
+            say "4";
+            $self->app->log->error('Daje::Controller::Users::Login::verify ' . $self->workflow_engine->error->error());
+            $self->render(json =>
+                {result => 0, data => $self->workflow_engine->error->error()}
+            );
+        }
+    } catch ($e) {
+        $self->app->log->error('Daje::Controller::Users::Login::verify ' . $e);
+        $self->render(json => {result => 0, data => $e});
+    };
+    $self->app->log->debug('Daje::Controller::Users::Login::verify ends');
+}
+1;
 
 1;
 __END__

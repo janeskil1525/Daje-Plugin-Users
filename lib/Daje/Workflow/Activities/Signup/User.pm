@@ -45,7 +45,6 @@ sub signup($self) {
         1
     );
 
-    say "Daje::Workflow::Activities::Signup::User::signup";
     my $data = $self->context->{context}->{payload};
     $data->{password} = sha512_base64($data->{password});
     try {
@@ -60,22 +59,37 @@ sub signup($self) {
         my $pkey = $dbclass->insert($data)->{data}->{$dbclass->primary_key_name()};
         $self->context->{context}->{payload}->{$dbclass->table_name()} = $pkey;
 
-        say "Daje::Workflow::Activities::Signup::User = " . $pkey;
-        my $code = Daje::Helper::Users::Login->new(
-            db => $self->db
-        )->verification(
-            $pkey
-        );
-        say "4";
-        Daje::Tools::Mail::Manager->new(
-            db    => $self->db,
-            error => $self->error(),
-        )->verify_simple(
-            $self->context->{context}->{payload}->{mail}, $code
-        );
+        $self->verify($data->{mail});
+
     } catch ($e) {
         $self->error->add_error($e);
     };
 }
 
+sub verify($self) {
+
+    my $data = $self->context->{context}->{payload};
+    $self->model->insert_history(
+        "Verify user",
+        "Daje::Workflow::Activities::Signup::User::verify " . $data->{mail},
+        1
+    );
+
+    say "Daje::Workflow::Activities::Signup::Verify = " . $data->{mail};
+
+    my $code = Daje::Helper::Users::Login->new(
+        db => $self->db
+    )->verify(
+        $data->{mail}
+    );
+
+    say "4";
+    Daje::Tools::Mail::Manager->new(
+        db    => $self->db,
+        error => $self->error(),
+    )->verify_simple(
+        $data->{mail}, $code
+    );
+
+}
 1;

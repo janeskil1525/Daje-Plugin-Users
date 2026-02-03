@@ -50,31 +50,13 @@ use v5.42;
 our $VERSION = '0.01';
 use Data::Dumper;
 
-sub save_verification_code($self, $users_users_pkey, $verification_code) {
-
-
-    my $verification_stmt = qq{
-        INSERT INTO users_verification_codes (users_users_fkey, verification_code) VALUES(?, ?)
-            ON CONFLICT(users_users_fkey)
-        DO UPDATE SET verification_code = ?
-            RETURNING users_verification_codes_pkey;
-    };
-
-    my $login_verification_codes_pkey = $self->db->query(
-        $verification_stmt,($users_users_pkey, $verification_code, $verification_code)
-    )->{login_verification_codes_pkey};
-
-    return $login_verification_codes_pkey;
-}
-
-sub save_verification_code_new_user($self, $mail, $verification_code) {
-
+sub save_verification_code($self, $mail, $verification_code) {
 
     my $verification_stmt = qq{
         INSERT INTO users_verification_codes (users_users_fkey, verification_code)
             VALUES((SELECT users_users_pkey FROM users_users WHERE mail = ?), ?)
                 ON CONFLICT(users_users_fkey)
-        DO UPDATE SET verification_code = ?
+        DO UPDATE SET verification_code = ?, moddatetime = NOW()
             RETURNING users_verification_codes_pkey;
     };
 

@@ -43,9 +43,9 @@ our $VERSION = "0.01";
 has 'db';
 
 sub login ($self, $mail, $password) {
-
+    my $outcome;
     my $login_stmt = qq{
-        SELECT users_users_pkey, mail, name, password
+        SELECT users_users_pkey, mail, users_workflow_fkey
             FROM users_users
            WHERE mail = ? AND password = ? AND active = true
     };
@@ -56,38 +56,65 @@ sub login ($self, $mail, $password) {
     $hash = $result->hash if $result->rows;
     if(!defined $hash) {
         $login_stmt = qq{
-        SELECT count(*) as inactive
-            FROM users_users
-           WHERE mail = ? AND active = false
-        };
-
-        $result = $self->db->query($login_stmt,($mail));
-        $hash = $result->hash if $result->rows;
-        if($hash->{inactive} == 1) {
-            $hash = {};
-            $hash->{status} = "inactive";
-        } elsif ($hash->{inactive} == 0) {
-            $login_stmt = qq{
             SELECT count(*) as exists
                 FROM users_users
                WHERE mail = ?
             };
-            $result = $self->db->query($login_stmt,($mail));
+        $result = $self->db->query($login_stmt,($mail));
+        $hash = $result->hash if $result->rows;
+        if($hash->{exists} == 0) {
+            $outcome->{status} = "nonexistent";
+        } else {
+            $outcome->{status} = "exists";
+        }
+
+        if($outcome->{status} eq "exists") {
+            $login_stmt = qq{
+                SELECT count(*) as inactive
+                    FROM users_users
+                   WHERE mail = ? AND password = ? AND active = false
+            };
+
+            $result = $self->db->query($login_stmt, ($mail, $password));
             $hash = $result->hash if $result->rows;
-            if($hash->{exists} == 0) {
+            if ($hash->{inactive} > 0) {
                 $hash = {};
-                $hash->{status} = "nonexistent";
+                $outcome = $self->is_user_registered($mail, $password);
             } else {
-                $hash = {};
-                $hash->{status} = "exists";
+                $outcome->{status} = "wrong_password";
             }
         }
+    } else {
+        $outcome = $hash;
+        $outcome->{status} = "success";
     }
-    say "Login " . Dumper($hash);
-    return $hash;
+    return $outcome;
 }
-sub user_inactive ( $mail, $password) {
 
+sub is_user_registered ($self, $mail, $password) {
+
+    my $hash->{status} = "inactive";
+    my $stmt = qq{
+            SELECT count(*) as has_company
+                FROM companies_users
+               WHERE users_users_fkey = (SELECT users_users_pkey FROM users_users WHERE mail = ? AND password = ?)
+            };
+    my $result = $self->db->query($stmt,($mail, $password));
+    $hash->{company} = $result->hash->{has_company};
+    $hash->{status} = "unregistered" if $hash->{company} == 0;
+    if($hash->{status} eq "unregistered") {
+        $stmt = qq{
+            SELECT users_users_pkey, mail, users_workflow_fkey
+                FROM users_users
+               WHERE mail = ? AND password = ?
+        };
+        $result = $self->db->query($stmt,($mail, $password))->hash;
+        $hash->{users_users_pkey} = $result->{users_users_pkey};
+        $hash->{users_workflow_fkey} = $result->{users_workflow_fkey};
+        $hash->{mail} = $result->{mail};
+    }
+
+    return $hash;
 }
 
 sub check_creds ($self, $userid, $password) {
@@ -104,9 +131,6 @@ sub check_creds ($self, $userid, $password) {
 
     return $result;
 }
-
-
-
 
 1;
 

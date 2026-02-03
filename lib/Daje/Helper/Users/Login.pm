@@ -5,7 +5,7 @@ use v5.42;
 # NAME
 # ====
 #
-# Daje::Helper::Login - Its a
+# Daje::Helper::Users::Login - Its a login helper
 #
 #
 # DESCRIPTION
@@ -17,11 +17,11 @@ use v5.42;
 # REQUIRES
 # ========
 #
-# Daje::Database::Model::Login
+# Daje::Helper::Users::Login
 #
 # Daje::Tools::JWT
 #
-# v5.40
+# v5.42
 #
 # Mojo::Base
 #
@@ -58,10 +58,15 @@ has 'db';
 has 'config';
 
 async sub login_user ($self, $mail, $password) {
+    my $result;
+    say "Password " . $password;
+    return $result = {
+        mail  => $mail,
+        status  => 'no_acceptable_password'
+    } unless length($password) > 7;
 
     $password = sha512_base64 $password;
 
-    say "Password: " . Dumper($password);
     my $login = Daje::Database::Model::Login->new(
         db => $self->db
     )->login(
@@ -69,8 +74,6 @@ async sub login_user ($self, $mail, $password) {
     );
 
     my $jwt;
-    my $result;
-
     if(defined $login and exists $login->{users_users_pkey}) {
         #my $json = encode_json($login);
         $jwt = await Daje::Tools::JWT->new()->encode_jwt_p(
@@ -78,11 +81,12 @@ async sub login_user ($self, $mail, $password) {
         );
 
         $result = {
-            mail  => $mail,
-            jwt     => $jwt,
-            expires => '',
-            support => $login->{support},
-            status  => 'success'
+            mail                => $mail,
+            jwt                 => $jwt,
+            expires             => '',
+            status              => $login->{status},
+            users_workflow_fkey => $login->{users_workflow_fkey},
+            users_users_pkey    => $login->{users_users_pkey},
         };
     } elsif (defined $login and exists $login->{status}) {
         $result = {
@@ -101,11 +105,8 @@ async sub check_verify($self, $mail, $verification_code) {
     return 0;
 }
 
-async sub load_company($self, $mail) {
 
-}
-
-sub verification($self, $users_users_pkey) {
+sub verify($self, $mail) {
 
     my @set = ('0' ..'9', 'A' .. 'F');
     my $verification_code = join '' => map $set[rand @set], 1 .. 4;
@@ -113,7 +114,7 @@ sub verification($self, $users_users_pkey) {
     my $login_verification_codes_pkey = Daje::Database::Model::UsersVerificationCodes->new(
         db => $self->db
     )->save_verification_code(
-        $users_users_pkey, $verification_code
+        $mail, $verification_code
     );
 
     return $verification_code;

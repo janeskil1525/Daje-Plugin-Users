@@ -88,9 +88,9 @@ sub register ($self, $app, $config) {
     my $r = $app->routes();
 
     $r->put($app->config->{project} . '/api/login/')->to('Login#login_user');
-    $r->put($app->config->{project} . '/api/verify/')->to('Login#check_verify');
-    $r->put($app->config->{project} . '/api/new/client/signup')->to('Signup#signup');
-
+    $r->put($app->config->{project} . '/api/check_verify/')->to('Login#check_verify');
+    $r->put($app->config->{project} . '/api/verify/')->to('Login#verify');
+    $r->put($app->config->{project} . '/api/new/client/signup')->to('Login#signup');
 
     $app->helper(
         login => sub {
