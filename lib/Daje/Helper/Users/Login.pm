@@ -59,7 +59,7 @@ has 'config';
 
 async sub login_user ($self, $mail, $password) {
     my $result;
-    say "Password " . $password;
+
     return $result = {
         mail  => $mail,
         status  => 'no_acceptable_password'
