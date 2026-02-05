@@ -38,7 +38,6 @@ our $VERSION = "0.01";
 
 sub login_user($self) {
 
-
     $self->render_later;
 
     my $data = from_json($self->req->body);
@@ -59,7 +58,6 @@ sub check_verify($self) {
     $self->render_later;
 
     my $data = from_json($self->req->body);
-    say "check_verify " . Dumper($data);
     $self->login->check_verify($data->{mail}, $data->{code})->then(sub ($result) {
         if(defined $result and $result == 1) {
             $self->render(json => {'result' => 'success', verified => 'true'});
@@ -101,7 +99,7 @@ sub verify($self) {
     $self->app->log->debug('Daje::Controller::Users::Login::verify '  . Dumper($self->req->body));
     my $data->{context} = decode_json $self->req->body;
     try {
-say Dumper($data);
+say "verify " . Dumper($data);
         $self->workflow_engine->workflow_pkey($data->{context}->{payload}->{users_workflow_fkey});
         $self->workflow_engine->workflow_name('users_users');
         $self->workflow_engine->context($data);
