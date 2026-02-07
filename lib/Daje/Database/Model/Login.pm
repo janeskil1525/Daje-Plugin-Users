@@ -118,16 +118,16 @@ sub is_user_registered ($self, $mail, $password) {
     return $hash;
 }
 
-sub check_creds ($self, $userid, $password) {
+sub check_creds ($self, $mail, $password) {
 
     my $check_stmt = qq{
         SELECT count(*) as exists
             FROM users_users
-           WHERE userid = ? AND passwd = ? AND active = true
+           WHERE mail = ? AND passwd = ? AND active = true
     };
 
     my $result = $self->db->query(
-        $check_stmt,($userid, $password)
+        $check_stmt,($mail, $password)
     )->hash->{exists};
 
     return $result;
