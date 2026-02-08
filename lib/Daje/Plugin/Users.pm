@@ -65,6 +65,7 @@ use Daje::Plugin::Users::Routes;
 use Daje::Plugin::Users::Helpers;
 use Daje::Database::Migrator;
 use Daje::Helper::Users::Login;
+use Data::Dumper;
 
 our $VERSION = '0.01';
 
@@ -87,11 +88,11 @@ sub register ($self, $app, $config) {
 
     my $r = $app->routes();
 
-    $r->put($app->config->{project} . '/api/login/')->to('Login#login_user');
-    $r->put($app->config->{project} . '/api/new/client/signup')->to('Login#signup');
-    $app->auth->put($app->config->{project} . '/api/check_verify/')->to('Login#check_verify');
-    $app->auth->put($app->config->{project} . '/api/verify/')->to('Login#verify');
+    $r->put($app->config->{project} . '/login/')->to('Login#login_user');
+    $r->put($app->config->{project} . '/new/client/signup')->to('Login#signup');
 
+    $app->auth->put('check_verify/')->to('Login#check_verify');
+    $app->auth->put('verify/')->to('Login#verify');
 
     $app->helper(
         login => sub {

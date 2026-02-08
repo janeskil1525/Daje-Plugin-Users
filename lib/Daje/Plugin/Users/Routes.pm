@@ -54,7 +54,7 @@ our $VERSION = '0.01';
 sub routes($self, $app, $config) {
     my $r = $app->routes;
 
-    $r->get('/users/api/v1/users_list_all/')->to('UsersUsersList#load_all_users_users');
+    $r->get('/v1/users_list_all/')->to('UsersUsersList#load_all_users_users');
     $r->get('/users/api/v1/users_workflow_list/:users_workflow_fkey')->to('UsersUsers#load_list_users_workflow_fkey');
     $r->get('/users/api/v1/verification_codes_list_all/')->to('UsersVerificationCodesList#load_all_users_verification_codes');
     $r->get('/users/api/v1/verification_codes_users_list/:users_users_fkey')->to('UsersVerificationCodes#load_list_users_users_fkey');

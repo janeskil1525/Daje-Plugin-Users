@@ -38,6 +38,7 @@ our $VERSION = "0.01";
 
 sub login_user($self) {
 
+    $self->app->log->debug('Daje::Controller::Users::Login::login_user '  . Dumper($self->req->body));
     $self->render_later;
 
     my $data = from_json($self->req->body);
@@ -56,7 +57,7 @@ sub login_user($self) {
 sub check_verify($self) {
 
     $self->render_later;
-
+    $self->app->log->debug('Daje::Controller::Users::Login::check_verify ' . Dumper($self->req->body));
     my $data = from_json($self->req->body);
     $self->login->check_verify($data->{mail}, $data->{code})->then(sub ($result) {
         if(defined $result and $result == 1) {
@@ -72,7 +73,7 @@ sub check_verify($self) {
 
 sub signup($self) {
 
-    $self->app->log->debug('Daje::Controller::Users::Login::signup '  . Dumper($self->req->body));
+    $self->app->log->debug('Daje::Controller::Users::Login::signup ' . Dumper($self->req->body));
     my $data->{context} = decode_json( $self->req->body );
     try {
         $self->workflow_engine->workflow_pkey(0);
@@ -99,18 +100,13 @@ sub verify($self) {
     $self->app->log->debug('Daje::Controller::Users::Login::verify '  . Dumper($self->req->body));
     my $data->{context} = decode_json $self->req->body;
     try {
-say "verify " . Dumper($data);
         $self->workflow_engine->workflow_pkey($data->{context}->{payload}->{users_workflow_fkey});
         $self->workflow_engine->workflow_name('users_users');
         $self->workflow_engine->context($data);
-        say "1";
         $self->workflow_engine->process('verify_users_user');
-        say "2";
         if($self->workflow_engine->error->has_error() == 0) {
-            say "3";
             $self->render(json => {result => 1, data => 'OK'});
         } else {
-            say "4";
             $self->app->log->error('Daje::Controller::Users::Login::verify ' . $self->workflow_engine->error->error());
             $self->render(json =>
                 {result => 0, data => $self->workflow_engine->error->error()}
