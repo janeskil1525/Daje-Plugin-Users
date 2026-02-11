@@ -49,6 +49,7 @@ use Daje::Tools::JWT;
 use Daje::Database::Model::Login;
 use Daje::Database::Model::UsersVerificationCodes;
 use Daje::Database::Model::CompaniesUsers;
+use POSIX;
 
 use Digest::SHA qw{sha512_base64};
 
@@ -75,15 +76,16 @@ async sub login_user ($self, $mail, $password) {
 
     my $jwt;
     if(defined $login and exists $login->{users_users_pkey}) {
-        #my $json = encode_json($login);
-        $jwt = await Daje::Tools::JWT->new()->encode_jwt_p(
+        $jwt = await Daje::Tools::JWT->new(
+            secret => @{$self->config->{secrets}}[0]
+        )->encode_jwt_p(
             $login
         );
-
+        my $logged_in = strftime "%Y-%m-%d %H:%M:%S", localtime time;
         $result = {
             mail                => $mail,
             jwt                 => $jwt,
-            expires             => '',
+            logged_in           => $logged_in,
             status              => $login->{status},
             users_workflow_fkey => $login->{users_workflow_fkey},
             users_users_pkey    => $login->{users_users_pkey},
@@ -98,10 +100,35 @@ async sub login_user ($self, $mail, $password) {
     return $result;
 }
 
+async sub post_login($self, $login ) {
+
+    delete $login->{jwt} if exists $login->{jwt};
+    my $jwt = await Daje::Tools::JWT->new(
+        secret => @{$self->config->{secrets}}[0]
+    )->encode_jwt_p(
+        $login->{data}
+    );
+
+    my $logged_in = strftime "%Y-%m-%d %H:%M:%S", localtime time;
+    my $result = {
+        mail                     => $login->{data}->{mail},
+        jwt                      => $jwt,
+        logged_in                => $logged_in,
+        status                   => $login->{data}->{status},
+        users_workflow_fkey      => $login->{users_workflow_fkey},
+        users_users_pkey         => $login->{data}->{users_users_pkey},
+        companies_companies_pkey => $login->{data}->{companies_companies_pkey},
+    };
+
+    return $result;
+}
+
 async sub check_verify($self, $mail, $verification_code) {
-    say " Daje::Helper::Users::Login->check_verify mail = $mail code = $verification_code";
-    return 1
-        if Daje::Database::Model::UsersVerificationCodes->new(db => $self->db)->check_verify($mail, $verification_code);
+    return 1 if Daje::Database::Model::UsersVerificationCodes->new(
+        db => $self->db
+    )->check_verify(
+        $mail, $verification_code
+    );
     return 0;
 }
 
@@ -122,7 +149,11 @@ sub verify($self, $mail) {
 
 sub authenticate ($self, $payload) {
 
-    my $claim = System::Helpers::Jwt->new()->decode_jwt($payload);
+    my $claim = System::Helpers::Jwt->new(
+        secret => @{$self->config->{secrets}}[0]
+    )->decode_jwt(
+        $payload
+    );
     my $login = Daje::Database::Model::Login->new(
         pg => $self->pg
     )->check_creds(

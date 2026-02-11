@@ -71,6 +71,19 @@ sub check_verify($self) {
     })->wait;
 }
 
+sub post_login($self) {
+
+    $self->render_later;
+    $self->app->log->debug('Daje::Controller::Users::Login::post_login ' . Dumper($self->req->body));
+    my $data = from_json($self->req->body);
+    $self->login->post_login($data)->then(sub ($result) {
+        $self->render(json => {'result' => 'success', data => $result});
+    })->catch(sub ($err) {
+        say "Error " . $err;
+        $self->render(json => {'result' => $err});
+    })->wait;
+}
+
 sub signup($self) {
 
     $self->app->log->debug('Daje::Controller::Users::Login::signup ' . Dumper($self->req->body));

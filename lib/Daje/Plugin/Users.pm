@@ -88,11 +88,12 @@ sub register ($self, $app, $config) {
 
     my $r = $app->routes();
 
-    $r->put($app->config->{project} . '/login/')->to('Login#login_user');
+    $r->put($app->config->{project} . '/login')->to('Login#login_user');
     $r->put($app->config->{project} . '/new/client/signup')->to('Login#signup');
 
     $app->auth->put('check_verify/')->to('Login#check_verify');
     $app->auth->put('verify/')->to('Login#verify');
+    $app->auth->put('post_login/')->to('Login#post_login');
 
     $app->helper(
         login => sub {
