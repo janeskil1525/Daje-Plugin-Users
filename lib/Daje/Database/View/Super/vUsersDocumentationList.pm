@@ -1,21 +1,21 @@
-package Daje::Database::View::Super::vUsersVerificationCodesList;
+package Daje::Database::View::Super::vUsersDocumentationList;
 use Mojo::Base 'Daje::Database::Model::Super::Common::Base', -base, -signatures, -async_await;
 use v5.42;
 
 # NAME
 # ====
 #
-# Daje::Database::View::Super::vUsersVerificationCodesList - Daje db view
+# Daje::Database::View::Super::vUsersDocumentationList - Daje db view
 #
 # SYNOPSIS
 # ========
 #
 #
-#       use Daje::Database::View::Super::vUsersVerificationCodesList;
+#       use Daje::Database::View::Super::vUsersDocumentationList;
 #
-#       my $table = Daje::Database::View::Super::vUsersVerificationCodesList->new(db => $db);
+#       my $table = Daje::Database::View::Super::vUsersDocumentationList->new(db => $db);
 #
-#       my $result = $table->load_users_verification_codes_pkey($self, $users_verification_codes_pkey);
+#       my $result = $table->load_users_documentation_pkey($self, $users_documentation_pkey);
 #
 #       my $result = $table->load_users_users_fkey($self, $users_users_fkey);
 ##
@@ -27,7 +27,7 @@ use v5.42;
 # DESCRIPTION
 # ===========
 #
-# Daje::Database::View::Super::UsersVerificationCodesList is a Model super class
+# Daje::Database::View::Super::UsersDocumentationList is a Model super class
 #
 # METHODS
 # =======
@@ -55,10 +55,10 @@ use v5.42;
 
 our $VERSION = '0.01';
 
-has 'fields' => '"users_verification_codes_pkey", "editnum", "insby", "insdatetime", "modby", "moddatetime","verification_code",
-"users_users_fkey"';
-has 'primary_key_name' => "users_verification_codes_pkey";
-has 'table_name' => "v_users_verification_codes_list";
+has 'fields' => '"users_documentation_pkey", "editnum", "insby", "insdatetime", "modby", "moddatetime","document_name",
+"users_users_fkey",""type""';
+has 'primary_key_name' => "users_documentation_pkey";
+has 'table_name' => "v_users_documentation_list";
 
 async sub load_all_users_users_list_p($self) {
     return $self->load_all_users_users_list();
@@ -79,11 +79,11 @@ sub load_users_users_list($self, $key_value) {
         $self->table_name, $self->fields(), $key_value
     );
 }
-async sub load_all_users_verification_codes_p($self) {
-    return $self->load_all_users_verification_codes();
+async sub load_all_users_documentation_p($self) {
+    return $self->load_all_users_documentation();
 }
 
-sub load_all_users_verification_codes($self) {
+sub load_all_users_documentation($self) {
     return $self->load_a_full_list(
         $self->table_name, $self->fields()
     );

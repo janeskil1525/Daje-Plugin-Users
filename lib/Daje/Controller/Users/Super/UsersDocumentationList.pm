@@ -1,21 +1,21 @@
-package Daje::Controller::Users::Super::UsersVerificationCodes;
+package Daje::Controller::Users::Super::UsersDocumentationList;
 use Mojo::Base 'Mojolicious::Controller', -base, -signatures;
 use v5.42;
 
 # NAME
 # ====
 #
-# Daje::Controller::Super::Users::UsersVerificationCodes - Model class
+# Daje::Controller::Users::Super::UsersDocumentationList - Model class
 #
 # SYNOPSIS
 # ========
 #
-#       use Daje::Controller::Users::Super::vUsersVerificationCodes##
+#       use Daje::Controller::Users::Super::vUsersDocumentation##
 #
 # DESCRIPTION
 # ===========
 #
-# Daje::Controller::Users::Super::UsersVerificationCodes is a standard controller
+# Daje::Controller::Users::Super::UsersDocumentation is a standard controller
 #
 # METHODS
 # =======
@@ -40,25 +40,24 @@ use v5.42;
 
 our $VERSION = '0.01';
 
-sub load_users_verification_codes_pkey($self) {
-    $self->app->log->debug('Daje::Controller::Super::UsersVerificationCodes::load_users__fkey ');
+sub load_all_users_documentation($self) {
+    $self->app->log->debug('Daje::Controller::Super::UsersDocumentationList::load_all_users_documentation ');
     $self->render_later;
     my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
          $self->req->headers->header('X-Token-Check')
     );
-    my $pkey = $self->param('users_verification_codes_pkey');
 
     $self->app->log->debug($self->req->headers->header('X-Token-Check'));
     # my $setting = $self->param('setting');
-    $self->v_users_verification_codes->load_users_verification_codes_pkey_p($pkey)->then(sub($result) {
+    $self->v_users_documentation_list->load_all_users_documentation_p()->then(sub($result) {
         $self->render(json => $result->{data});
     })->catch(sub($err) {
-        $self->app->log->error('Daje::Controller::Super::UsersVerificationCodes::load_users_verification_codes_pkey ' . $err);
+        $self->app->log->error('Daje::Controller::Super::UsersDocumentationList::load_all_users_documentation ' . $err);
         $self->render
     });
 }
-sub load_users_users_fkey($self) {
-    $self->app->log->debug('Daje::Controller::Super::UsersVerificationCodes::load_users_users_fkey ');
+sub load_list_users_users_fkey($self) {
+    $self->app->log->debug('Daje::Controller::Super::UsersDocumentationList::load_listusers_users_fkey ');
     $self->render_later;
     my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
          $self->req->headers->header('X-Token-Check')
@@ -67,10 +66,10 @@ sub load_users_users_fkey($self) {
 
     $self->app->log->debug($self->req->headers->header('X-Token-Check'));
     # my $setting = $self->param('setting');
-    $self->v_users_->users_users_fkey_p($fkey)->then(sub($result) {
+    $self->v_users__list->users_users_fkey_p($fkey)->then(sub($result) {
         $self->render(json => $result->{data});
     })->catch(sub($err) {
-        $self->app->log->error('Daje::Controller::Super::UsersVerificationCodes::load_users_users_fkey ' . $err);
+        $self->app->log->error('Daje::Controller::Super::UsersDocumentation::load_users_users_fkey ' . $err);
         $self->render
     });
 }

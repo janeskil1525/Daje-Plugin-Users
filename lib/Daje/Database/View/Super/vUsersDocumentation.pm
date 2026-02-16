@@ -1,21 +1,21 @@
-package Daje::Database::View::Super::vUsersVerificationCodes;
+package Daje::Database::View::Super::vUsersDocumentation;
 use Mojo::Base 'Daje::Database::Model::Super::Common::Base', -base, -signatures, -async_await;
 use v5.42;
 
 # NAME
 # ====
 #
-# Daje::Database::View::Super::vUsersVerificationCodes - Daje db model
+# Daje::Database::View::Super::vUsersDocumentation - Daje db model
 #
 # SYNOPSIS
 # ========
 #
 #
-#       use Daje::Database::View::Super::vUsersVerificationCodes;
+#       use Daje::Database::View::Super::vUsersDocumentation;
 #
-#       my $table = Daje::Database::View::Super::vUsersVerificationCodes->new(db => $db);
+#       my $table = Daje::Database::View::Super::vUsersDocumentation->new(db => $db);
 #
-#       my $result = $table->load_users_verification_codes_pkey($self, $users_verification_codes_pkey);
+#       my $result = $table->load_users_documentation_pkey($self, $users_documentation_pkey);
 #
 #       my $result = $table->load_users_users_fkey($self, $users_users_fkey);
 ##
@@ -24,7 +24,7 @@ use v5.42;
 # DESCRIPTION
 # ===========
 #
-# Daje::Database::View::Super::vUsersVerificationCodes is a View super class
+# Daje::Database::View::Super::vUsersDocumentation is a View super class
 #
 # METHODS
 # =======
@@ -52,9 +52,9 @@ use v5.42;
 
 our $VERSION = '0.01';
 
-has 'fields' => '"users_verification_codes_pkey", "editnum", "insby", "insdatetime", "modby", "moddatetime","verification_code","users_users_fkey"';
-has 'primary_key_name' => "users_verification_codes_pkey";
-has 'table_name' => "v_users_verification_codes";
+has 'fields' => '"users_documentation_pkey", "editnum", "insby", "insdatetime", "modby", "moddatetime","document_name","users_users_fkey",""type""';
+has 'primary_key_name' => "users_documentation_pkey";
+has 'table_name' => "v_users_documentation";
 
 
 async sub load_users_users_fkey_p($self, $users_users_fkey) {
@@ -66,13 +66,13 @@ sub load_users_users_fkey($self, $users_users_fkey) {
         $self->table_name, $self->fields(), "users_users_fkey", $users_users_fkey
     );
 }
-async sub load_users_verification_codes_pkey_p($self, $users_verification_codes_pkey) {
-    return $self->load_users_verification_codes_pkey($users_verification_codes_pkey);
+async sub load_users_documentation_pkey_p($self, $users_documentation_pkey) {
+    return $self->load_users_documentation_pkey($users_documentation_pkey);
 }
 
-sub load_users_verification_codes_pkey($self, $users_verification_codes_pkey) {
+sub load_users_documentation_pkey($self, $users_documentation_pkey) {
     return $self->load_pk(
-        $self->table_name, $self->fields(), $self->primary_key_name(), $users_verification_codes_pkey
+        $self->table_name, $self->fields(), $self->primary_key_name(), $users_documentation_pkey
     );
 }
 
