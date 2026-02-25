@@ -66,6 +66,7 @@ use Daje::Plugin::Users::Helpers;
 use Daje::Database::Migrator;
 use Daje::Helper::Users::Login;
 use Daje::Plugin::Users::Authorities;
+use Daje::Plugin::Users::Languages;
 use Data::Dumper;
 
 our $VERSION = '0.01';
@@ -107,7 +108,13 @@ sub register ($self, $app, $config) {
 
     Daje::Plugin::Users::Routes->new()->routes($app, $config);
     Daje::Plugin::Users::Helpers->new()->helpers($app, $config);
-    Daje::Plugin::Users::Authorities->new(db => $app->pg->db)->authorize();
+    Daje::Plugin::Users::Authorities->new(
+        db => $app->pg->db
+    )->authorize();
+
+    Daje::Plugin::Users::Languages->new(
+        db => $app->pg->db
+    )->language();
 
     $app->log->debug("Daje::Plugin::Users::register ends");
 }
