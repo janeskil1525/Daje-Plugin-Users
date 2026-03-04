@@ -113,6 +113,7 @@ sub verify($self) {
     $self->app->log->debug('Daje::Controller::Users::Login::verify '  . Dumper($self->req->body));
     my $data->{context} = decode_json $self->req->body;
     try {
+        say Dumper($data);
         $self->workflow_engine->workflow_pkey($data->{context}->{payload}->{users_workflow_fkey});
         $self->workflow_engine->workflow_name('users_users');
         $self->workflow_engine->context($data);

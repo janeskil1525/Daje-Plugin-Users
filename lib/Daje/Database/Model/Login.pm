@@ -60,7 +60,6 @@ sub login ($self, $mail, $password) {
                 FROM users_users
                WHERE mail = ?
             };
-        say "mail = " . $mail;
         $result = $self->db->query($login_stmt,($mail));
         $hash = $result->hash if $result->rows;
         if($hash->{exists} == 0) {
@@ -123,7 +122,7 @@ sub check_creds ($self, $mail, $password) {
     my $check_stmt = qq{
         SELECT count(*) as exists
             FROM users_users
-           WHERE mail = ? AND passwd = ? AND active = true
+           WHERE mail = ? AND password = ? AND active = true
     };
 
     my $result = $self->db->query(

@@ -51,6 +51,8 @@ use Daje::Database::Model::UsersVerificationCodes;
 use Daje::Database::Model::CompaniesUsers;
 use POSIX;
 
+use Data::Dumper;
+
 use Digest::SHA qw{sha512_base64};
 
 our $VERSION = "0.01";
@@ -75,6 +77,7 @@ async sub login_user ($self, $mail, $password) {
     );
 
     my $jwt;
+    $login->{password} = $password;
     if(defined $login and exists $login->{users_users_pkey}) {
         $jwt = await Daje::Tools::JWT->new(
             secret => @{$self->config->{secrets}}[0]
@@ -102,12 +105,24 @@ async sub login_user ($self, $mail, $password) {
 
 async sub post_login($self, $login ) {
 
-    delete $login->{jwt} if exists $login->{jwt};
-    my $jwt = await Daje::Tools::JWT->new(
+    say "post_login login" . Dumper($login);
+    # delete $login->{jwt} if exists $login->{jwt};
+
+    my $claim  = await Daje::Tools::JWT->new(
         secret => @{$self->config->{secrets}}[0]
-    )->encode_jwt_p(
-        $login->{data}
+    )->decode_jwt_p(
+        $login->{data}->{jwt}
     );
+
+    $claim->{companies_companies_pkey} = $login->{data}->{companies_companies_pkey};
+    $claim->{users_users_pkey} = $login->{data}->{users_users_pkey};
+    say "post_login claim" . Dumper($claim);
+
+    my $jwt = await Daje::Tools::JWT->new(
+         secret => @{$self->config->{secrets}}[0]
+     )->encode_jwt_p(
+        $claim
+     );
 
     my $logged_in = strftime "%Y-%m-%d %H:%M:%S", localtime time;
     my $result = {
@@ -132,33 +147,44 @@ async sub check_verify($self, $mail, $verification_code) {
     return 0;
 }
 
-
 sub verify($self, $mail) {
 
     my @set = ('0' ..'9', 'A' .. 'F');
     my $verification_code = join '' => map $set[rand @set], 1 .. 4;
 
-    my $login_verification_codes_pkey = Daje::Database::Model::UsersVerificationCodes->new(
-        db => $self->db
-    )->save_verification_code(
-        $mail, $verification_code
-    );
+    try {
+        Daje::Database::Model::UsersVerificationCodes->new(
+            db => $self->db
+        )->save_verification_code(
+            $mail, $verification_code
+        );
+    } catch($e) {
+        say $e;
+        $self->app->log>error($e);
+    };
 
     return $verification_code;
 }
 
 sub authenticate ($self, $payload) {
-
-    my $claim = System::Helpers::Jwt->new(
-        secret => @{$self->config->{secrets}}[0]
-    )->decode_jwt(
-        $payload
-    );
-    my $login = Daje::Database::Model::Login->new(
-        pg => $self->pg
-    )->check_creds(
-        $claim->{mail}, $claim->{password}
-    );
+    my $login;
+    say "authenticate payload " . Dumper($payload);
+    try {
+        my $claim = Daje::Tools::JWT->new(
+            secret => @{$self->config->{secrets}}[0]
+        )->decode_jwt(
+            $payload
+        );
+    say "authenticate claim " . Dumper($claim);
+        $login = Daje::Database::Model::Login->new(
+            db => $self->db
+        )->check_creds(
+            $claim->{mail}, $claim->{password}
+        );
+    } catch($e) {
+        say $e;
+    };
+    say Dumper($login);
 
     return $login;
 }
