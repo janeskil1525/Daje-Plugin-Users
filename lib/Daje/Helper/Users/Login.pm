@@ -92,6 +92,8 @@ async sub login_user ($self, $mail, $password) {
             status              => $login->{status},
             users_workflow_fkey => $login->{users_workflow_fkey},
             users_users_pkey    => $login->{users_users_pkey},
+            avatar              => $login->{avatar},
+            name                => $login->{name},
         };
     } elsif (defined $login and exists $login->{status}) {
         $result = {
@@ -99,25 +101,17 @@ async sub login_user ($self, $mail, $password) {
             status  => $login->{status}
         };
     }
-
     return $result;
 }
 
 async sub post_login($self, $login ) {
-
-    say "post_login login" . Dumper($login);
-    # delete $login->{jwt} if exists $login->{jwt};
-
     my $claim  = await Daje::Tools::JWT->new(
         secret => @{$self->config->{secrets}}[0]
     )->decode_jwt_p(
         $login->{data}->{jwt}
     );
-
     $claim->{companies_companies_pkey} = $login->{data}->{companies_companies_pkey};
     $claim->{users_users_pkey} = $login->{data}->{users_users_pkey};
-    say "post_login claim" . Dumper($claim);
-
     my $jwt = await Daje::Tools::JWT->new(
          secret => @{$self->config->{secrets}}[0]
      )->encode_jwt_p(
@@ -133,6 +127,8 @@ async sub post_login($self, $login ) {
         users_workflow_fkey      => $login->{users_workflow_fkey},
         users_users_pkey         => $login->{data}->{users_users_pkey},
         companies_companies_pkey => $login->{data}->{companies_companies_pkey},
+        avatar                   => $login->{data}->{avatar},
+        name                     => $login->{data}->{name},
     };
 
     return $result;
@@ -168,14 +164,12 @@ sub verify($self, $mail) {
 
 sub authenticate ($self, $payload) {
     my $login;
-    say "authenticate payload " . Dumper($payload);
     try {
         my $claim = Daje::Tools::JWT->new(
             secret => @{$self->config->{secrets}}[0]
         )->decode_jwt(
             $payload
         );
-    say "authenticate claim " . Dumper($claim);
         $login = Daje::Database::Model::Login->new(
             db => $self->db
         )->check_creds(
@@ -184,7 +178,6 @@ sub authenticate ($self, $payload) {
     } catch($e) {
         say $e;
     };
-    say Dumper($login);
 
     return $login;
 }
