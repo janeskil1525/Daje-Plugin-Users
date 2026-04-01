@@ -69,7 +69,7 @@ use Daje::Plugin::Users::Authorities;
 use Daje::Plugin::Users::Languages;
 use Data::Dumper;
 
-our $VERSION = '0.03';
+our $VERSION = '0.05';
 
 sub register ($self, $app, $config) {
     $app->log->debug("Daje::Plugin::Users::register start");
