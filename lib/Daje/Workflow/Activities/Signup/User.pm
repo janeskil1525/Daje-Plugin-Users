@@ -58,8 +58,13 @@ sub signup($self) {
         $data->{$dbclass->workflow()} = $self->context->{context}->{workflow}->{workflow_fkey}
             if($dbclass->workflow());
 
-        my $pkey = $dbclass->insert($data)->{data}->{$dbclass->primary_key_name()};
-        $self->context->{context}->{payload}->{$dbclass->table_name()} = $pkey;
+        $self->context->{context}->{payload}->{
+            $dbclass->primary_key_name()
+        } = $dbclass->insert(
+            $data
+        )->{data}->{
+            $dbclass->primary_key_name()
+        };
 
     } catch ($e) {
         $self->error->add_error($e);
