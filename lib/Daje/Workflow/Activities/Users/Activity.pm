@@ -50,6 +50,8 @@ use v5.42;
 
 use Daje::Database::Model::CompaniesUsers;
 use POSIX;
+use Digest::SHA qw{sha512_base64};
+use Data::Dumper;
 
 sub save($self) {
 
@@ -75,12 +77,13 @@ sub save($self) {
 
         my $authorities_role_fkey = $data->{authorities_role_fkey};
         my $position = $data->{position};
-        delete %$data["authorities_role_fkey"];
-        delete %$data["position"];
+        delete $data->{ "authorities_role_fkey" };
+        delete $data->{"position"};
 
-        if( !exista $data->{users_users_pkey} || $data->{users_users_pkey} == 0) {
+        say "Data " . Dumper($data);
+        if( !exists $data->{users_users_pkey} || $data->{users_users_pkey} == 0) {
 
-            delete %$data['users_users_pkey'];
+            delete $data->{'users_users_pkey'};
             $self->context->{context}->{payload}->{$dbclass->primary_key_name()} = $dbclass->insert(
                 $data
             )->{data}->{$dbclass->primary_key_name()};
