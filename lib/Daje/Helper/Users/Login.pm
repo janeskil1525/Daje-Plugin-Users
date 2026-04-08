@@ -110,6 +110,7 @@ async sub post_login($self, $login ) {
     )->decode_jwt_p(
         $login->{data}->{jwt}
     );
+
     $claim->{companies_companies_pkey} = $login->{data}->{companies_companies_pkey};
     $claim->{users_users_pkey} = $login->{data}->{users_users_pkey};
     my $jwt = await Daje::Tools::JWT->new(
