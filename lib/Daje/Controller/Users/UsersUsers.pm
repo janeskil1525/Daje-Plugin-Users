@@ -43,5 +43,24 @@ use v5.42;
 
 our $VERSION = '0.01';
 
+
+sub load_complete_user($self) {
+    $self->app->log->debug('Daje::Controller::Super::UsersUsers::load_users__fkey ');
+    $self->render_later;
+    my ($companies_pkey, $users_pkey) = $self->jwt->companies_users_pkey(
+        $self->req->headers->header('X-Token-Check')
+    );
+    my $pkey = $self->param('users_users_pkey');
+
+    $self->app->log->debug($self->req->headers->header('X-Token-Check'));
+    # my $setting = $self->param('setting');
+    $self->complete_user->load_complete_user_p($companies_pkey, $users_pkey, $pkey)->then(sub($result) {
+        $self->render(json => $result->{data});
+    })->catch(sub($err) {
+        $self->app->log->error('Daje::Controller::Super::UsersUsers::load_users_users_pkey ' . $err);
+        $self->render
+    });
+}
+
 1;
 

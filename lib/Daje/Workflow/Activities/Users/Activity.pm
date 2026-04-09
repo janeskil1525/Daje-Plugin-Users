@@ -79,6 +79,7 @@ sub save($self) {
         my $position = $data->{position};
         delete $data->{ "authorities_role_fkey" };
         delete $data->{"position"};
+        delete $data->{companies_companies_fkey};
 
         say "Data " . Dumper($data);
         if( !exists $data->{users_users_pkey} || $data->{users_users_pkey} == 0) {
@@ -98,9 +99,8 @@ sub save($self) {
                 comment                  => "Created " . strftime "%Y-%m-%d %H:%M:%S", localtime time,
             });
         } else {
-            $dbclass->update($data, {
-                users_users_pkey => $data->{users_users_pkey}
-            });
+
+            $dbclass->update($data);
 
             Daje::Database::Model::CompaniesUsers->new(
                 db => $self->db

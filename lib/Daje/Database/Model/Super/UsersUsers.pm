@@ -101,6 +101,7 @@ sub insert($self, $data) {
 }
 
 sub update($self, $data) {
+
     return $self->SUPER::update
     (
         $self->table_name, $data,

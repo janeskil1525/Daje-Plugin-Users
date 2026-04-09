@@ -67,6 +67,7 @@ use Daje::Database::Migrator;
 use Daje::Helper::Users::Login;
 use Daje::Plugin::Users::Authorities;
 use Daje::Plugin::Users::Languages;
+use Daje::Helper::Users::LoadCompleteUser;
 use Data::Dumper;
 
 our $VERSION = '0.05';
@@ -96,6 +97,7 @@ sub register ($self, $app, $config) {
     $app->auth->put('check_verify/')->to('Login#check_verify');
     $app->auth->put('verify/')->to('Login#verify');
     $app->auth->put('post_login/')->to('Login#post_login');
+    $app->auth->get('v1/load_complete_user/:users_users_pkey')->to('UsersUsers#load_complete_user');
 
     $app->helper(
         login => sub {
@@ -105,6 +107,15 @@ sub register ($self, $app, $config) {
             )
         }
     );
+
+    $app->helper(
+        complete_user => sub {
+            state $complete_user = Daje::Helper::Users::LoadCompleteUser->new(
+                db     => $app->pg->db
+            )
+        }
+    );
+
 
     Daje::Plugin::Users::Routes->new()->routes($app, $config);
     Daje::Plugin::Users::Helpers->new()->helpers($app, $config);
